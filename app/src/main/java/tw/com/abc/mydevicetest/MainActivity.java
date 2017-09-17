@@ -4,7 +4,11 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,11 +17,13 @@ import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
     private TelephonyManager tmgr;
     private MyListener myListener;
     private int lastState=-1;
+    private ImageView img;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+        img=(ImageView)findViewById(R.id.img);
         /*
         // 1. 電話狀態
         tmgr=(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
@@ -80,8 +87,18 @@ public class MainActivity extends AppCompatActivity {
         }
         c.close();
 
+        //3.讀取照片
+        // 沿用上面的c
+        c=cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,null,null,null,null);
+        c.moveToLast();
+        String file =c.getString(c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+        Log.i("brad",file);
+
+        Bitmap bmp = BitmapFactory.decodeFile(file);
+        img.setImageBitmap(bmp);
     }
 
+    // Sensor 拆到另一個範例
 
 
     //
