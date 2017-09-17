@@ -12,7 +12,10 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
-    private TelephonyManager tngr;
+    private TelephonyManager tmgr;
+    private MyListener myListener;
+    private int lastState=-1;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,32 +41,59 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
-        tngr=(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        String deviceid = tngr.getDeviceId();
+        tmgr=(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+        String deviceid = tmgr.getDeviceId();
         Log.i("brad","IMEI:"+deviceid);
-        String num =tngr.getLine1Number();
+        String num =tmgr.getLine1Number();
         Log.i("brad","phone:"+num);
-        String IMSI=tngr.getSubscriberId();
+        String IMSI=tmgr.getSubscriberId();
         Log.i("brad","IMSI:"+IMSI);
 
-        tngr.listen(new MyListener(), PhoneStateListener.LISTEN_CALL_STATE);
+        myListener=new MyListener();
+        // 要先listen
+        //tmgr.listen(myListener, PhoneStateListener.LISTEN_CALL_STATE);
+        reListen();
     }
+
+
+
     //
     private class MyListener extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            super.onCallStateChanged(state, incomingNumber);
+            //放上面和放下面看起來沒差異
+            // super.onCallStateChanged(state, incomingNumber);
+            Log.i("brad","get it!!");
             switch (state){
+                //斷線狀態
                 case TelephonyManager.CALL_STATE_IDLE:
-                    Log.i("brad","IDLE");
+                    if(state != lastState){
+                        Log.i("brad","IDLE");
+                        lastState = state;
+                    }
                     break;
+                //來電
                 case TelephonyManager.CALL_STATE_RINGING:
-                    Log.i("brad","RING:"+incomingNumber);
+                    if(state != lastState) {
+                        Log.i("brad", "RING:" + incomingNumber);
+                        // 可以不用再呼叫
+                       // reListen();
+                        lastState =state;
+                    }
                     break;
+                // 接電話
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                     Log.i("brad","offhook");
                     break;
+                default:
+                    Log.i("brad","other:"+state);
             }
+            //放上面和放下面看起來沒差異
+            super.onCallStateChanged(state, incomingNumber);
         }
+    }
+    private void reListen(){
+        tmgr.listen(myListener,PhoneStateListener.LISTEN_CALL_STATE);
     }
 }
