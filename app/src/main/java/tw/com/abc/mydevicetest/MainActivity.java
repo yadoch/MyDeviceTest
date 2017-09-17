@@ -1,7 +1,10 @@
 package tw.com.abc.mydevicetest;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+        /*
+        // 1. 電話狀態
         tmgr=(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
         String deviceid = tmgr.getDeviceId();
@@ -54,6 +59,27 @@ public class MainActivity extends AppCompatActivity {
         // 要先listen
         //tmgr.listen(myListener, PhoneStateListener.LISTEN_CALL_STATE);
         reListen();
+*/
+        //2.取得聯絡人資訊
+        String name = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME;
+        String number= ContactsContract.CommonDataKinds.Phone.NUMBER;
+        ContentResolver cr = getContentResolver(); // SQLite DB
+        // 指標
+        Cursor c = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,null,null,null);
+        while (c.moveToNext()){
+            //不知道欄位的意義改用ContactsContract.CommonDataKinds.Phone 取值
+            /*
+            String f1 =c.getString(0);
+            String f2 =c.getString(1);
+            String f3 =c.getString(3);
+            */
+
+            String f1 =c.getString(c.getColumnIndex(name));
+            String f2 =c.getString(c.getColumnIndex(number));
+            Log.i("brad",f1+":"+f2);
+        }
+        c.close();
+
     }
 
 
